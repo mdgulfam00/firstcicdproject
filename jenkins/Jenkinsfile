@@ -4,86 +4,47 @@ pipeline {
 
   options {
     timestamps()
-    ansiColor('xterm')
   }
 
-  tools {
-    maven 'Maven 3.9'   // Manage Jenkins -> Tools me yehi name rakha ho
-    nodejs 'Node 18'    // Manage Jenkins -> Tools me yehi name rakha ho
-  }
-
-  environment {
-    BACKEND_DIR  = 'backend'   // change if needed
-    FRONTEND_DIR = 'frontend'  // change if needed
-    ARTIFACTS    = 'ci-artifacts'
+  triggers {
+    // optional: every push ke bajaye poll SCM karna ho to uncomment
+    // pollSCM('@hourly')
   }
 
   stages {
-    stage('Checkout') {
+    stage('Check Java & Git') {
       steps {
-        // Since we are using "Pipeline from SCM", Jenkins will do checkout itself.
-        // But adding checkout scm is harmless and explicit:
-        checkout scm
-        sh 'echo "Repo contents:" && ls -la'
+        sh 'java -version || true'
+        sh 'git --version'
       }
     }
 
-    stage('Backend: Build & Test') {
+    stage('Build') {
       steps {
-        dir("${BACKEND_DIR}") {
-          sh '''
-            echo "== Maven version ==" && mvn -v
-            echo "== Build & Test ==" && mvn -q -DskipTests=false clean verify
-          '''
-        }
-      }
-      post {
-        always {
-          junit testResults: "${BACKEND_DIR}/**/target/surefire-reports/*.xml", allowEmptyResults: true
-        }
+        sh './mvnw -B -DskipTests clean package'
       }
     }
 
-    stage('Frontend: Install & Build') {
+    stage('Test') {
       steps {
-        dir("${FRONTEND_DIR}") {
-          sh '''
-            echo "== Node & npm ==" && node -v && npm -v
-            echo "== Install deps ==" && (npm ci || npm install)
-            echo "== Build ==" && npm run build
-          '''
-        }
+        sh './mvnw test'
       }
     }
 
-    stage('Package Artifacts') {
+    stage('Package Info') {
       steps {
-        sh '''
-          set -eux
-          rm -rf ${ARTIFACTS}
-          mkdir -p ${ARTIFACTS}
-
-          # Backend jar(s)
-          cp ${BACKEND_DIR}/target/*.jar ${ARTIFACTS}/ || true
-
-          # Frontend artifact (Vite -> dist, CRA -> build)
-          if [ -d "${FRONTEND_DIR}/dist" ]; then
-            tar -C ${FRONTEND_DIR}/dist -czf ${ARTIFACTS}/frontend-dist.tgz .
-          elif [ -d "${FRONTEND_DIR}/build" ]; then
-            tar -C ${FRONTEND_DIR}/build -czf ${ARTIFACTS}/frontend-build.tgz .
-          else
-            echo "No frontend build output found" >&2
-          fi
-
-          ls -la ${ARTIFACTS}
-        '''
-        archiveArtifacts artifacts: "${ARTIFACTS}/**", fingerprint: true
+        sh 'ls -lah target || true'
       }
     }
   }
 
   post {
-    success { echo '✅ Pipeline success' }
-    failure { echo '❌ Pipeline failed — check stage logs' }
+    success {
+      archiveArtifacts artifacts: 'target/**/*.jar', fingerprint: true
+      junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
+    }
+    always {
+      echo "Build finished: ${currentBuild.currentResult}"
+    }
   }
 }

@@ -2,14 +2,7 @@
 pipeline {
   agent any
 
-  options {
-    timestamps()
-  }
-
-  triggers {
-    // optional: every push ke bajaye poll SCM karna ho to uncomment
-    // pollSCM('@hourly')
-  }
+  options { timestamps() }
 
   stages {
     stage('Check Java & Git') {
@@ -21,6 +14,7 @@ pipeline {
 
     stage('Build') {
       steps {
+        // Using Maven Wrapper (mvnw). If you don't have it, see Option C below.
         sh './mvnw -B -DskipTests clean package'
       }
     }

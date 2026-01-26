@@ -1,29 +1,31 @@
+
 pipeline {
     agent any
 
     stages {
-        stage('Build') {
+        stage('Environment Check') {
             steps {
-                echo 'Building..'
+                echo 'Checking Java version...'
+                sh '''
+                    echo "JAVA_HOME=$JAVA_HOME"
+                    java -version
+                '''
             }
         }
-        stage('Test') {
-            steps {
-                echo 'Testing..'
-            }
-        }
-        stage('Deploy') {
-            steps {
-                echo 'Deploying....'
-            }
-        }
-        
-                stage('Check Java Version') {
-                    steps {
-                        sh 'java -version'
-                    }
-                }
-            
 
+        stage('Hello World') {
+            steps {
+                echo 'Hello World from Jenkins Pipeline!'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Pipeline executed successfully'
+        }
+        failure {
+            echo '❌ Pipeline failed'
+        }
     }
 }

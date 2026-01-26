@@ -2,24 +2,11 @@
 pipeline {
   agent any
 
-  options { timestamps() }
-
   stages {
-    stage('Check Java & Git') {
+    stage('Hello') {
       steps {
-        sh 'java -version || true'
-        sh 'git --version'
+        echo 'Hello Jenkins! Pipeline is working ✅'
       }
-    }
-  }
-
-  post {
-    success {
-      archiveArtifacts artifacts: 'target/**/*.jar', fingerprint: true
-      junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
-    }
-    always {
-      echo "Build finished: ${currentBuild.currentResult}"
     }
   }
 }

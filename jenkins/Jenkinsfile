@@ -8,6 +8,13 @@ pipeline {
         echo 'Hello Jenkins! Pipeline is working ✅'
         echo 'git --version'
       }
+      
+    stage('Build') {
+    steps {
+        sh './mvnw clean package'
+    }
+    }
+
     }
   }
 }

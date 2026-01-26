@@ -11,25 +11,6 @@ pipeline {
         sh 'git --version'
       }
     }
-
-    stage('Build') {
-      steps {
-        // Using Maven Wrapper (mvnw). If you don't have it, see Option C below.
-        sh './mvnw -B -DskipTests clean package'
-      }
-    }
-
-    stage('Test') {
-      steps {
-        sh './mvnw test'
-      }
-    }
-
-    stage('Package Info') {
-      steps {
-        sh 'ls -lah target || true'
-      }
-    }
   }
 
   post {

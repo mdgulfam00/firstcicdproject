@@ -1,4 +1,4 @@
-
+/
 pipeline {
     agent any
 
@@ -46,7 +46,7 @@ pipeline {
     post {
         success {
             echo "✅ Build successful for ${APP_NAME}"
-            archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            archiveArtifacts artifacts: 'backend/target/*.jar', fingerprint: true
         }
 
         failure {

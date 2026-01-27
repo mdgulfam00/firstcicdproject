@@ -46,7 +46,7 @@ pipeline {
     post {
         success {
             echo "✅ Build successful for ${APP_NAME}"
-            // archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
         }
 
         failure {

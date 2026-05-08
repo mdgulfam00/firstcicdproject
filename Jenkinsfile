@@ -1,60 +1,46 @@
-
 pipeline {
     agent any
-
-    tools {
-        jdk 'java21'       // Must match Jenkins Global Tool Configuration
-        maven 'mvn'
+ 
+    triggers {
+        githubPush()
     }
-
+ 
     environment {
-        APP_NAME = "demo-java-app"
+        COMPOSE_PROJECT_NAME = "expense-tracker-dev"
     }
-
+ 
     stages {
-
-        stage('Checkout Code') {
+ 
+        stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/mdgulfam00/firstcicdproject.git'
+                checkout scm
             }
         }
-
-        stage('Java Version') {
+ 
+        stage('Build Docker Images') {
             steps {
                 sh '''
-                    echo "JAVA_HOME=$JAVA_HOME"
-                    java -version
-                    mvn -version
+                  docker compose build
                 '''
             }
         }
-
-        stage('Build') {
+ 
+        stage('Restart Containers') {
             steps {
-                sh 'mvn -f backend/pom.xml clean package -DskipTests'
+                sh '''
+                  docker compose down
+                  docker compose up -d
+                '''
             }
         }
-
-        // stage('Test') {
-        //     steps {
-        //         sh 'mvn test'
-        //     }
-        // }
     }
-
+ 
     post {
         success {
-            echo "✅ Build successful for ${APP_NAME}"
-            archiveArtifacts artifacts: 'backend/target/*.jar', fingerprint: true
+            echo 'Deployment successful!'
         }
-
         failure {
-            echo "❌ Build failed for ${APP_NAME}"
-        }
-
-        always {
-            echo 'Pipeline execution completed'
+            echo 'Deployment failed!'
         }
     }
 }

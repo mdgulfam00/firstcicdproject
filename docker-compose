@@ -4,11 +4,6 @@ services:
     image: mysql:8.0
     container_name: expense-tracker-mysql
     restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_DATABASE: expense_tracker
-      MYSQL_USER: expenseuser  # Changed from 'root' - see explanation below
-      MYSQL_PASSWORD: 123456
     ports:
       - "3307:3306"
     volumes:

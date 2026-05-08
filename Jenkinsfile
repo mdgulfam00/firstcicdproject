@@ -20,7 +20,7 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 sh '''
-                  sudo docker compose build
+                  docker compose build
                 '''
             }
         }
@@ -28,8 +28,8 @@ pipeline {
         stage('Restart Containers') {
             steps {
                 sh '''
-                  sudo docker compose down
-                  sudo docker compose up -d
+                  docker compose down
+                  docker compose up -d
                 '''
             }
         }
